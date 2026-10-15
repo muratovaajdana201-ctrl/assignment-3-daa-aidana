@@ -3,6 +3,7 @@ package mst;
 
 import graph.Edge;
 import graph.Graph;
+import metrics.AlgorithmMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,13 @@ import java.util.PriorityQueue;
 public class Prim {
 
     public static MSTResult findMST(Graph graph) {
+        return findMST(graph, null);
+    }
+
+    public static MSTResult findMST(
+            Graph graph,
+            AlgorithmMetrics metrics
+    ) {
         int vertices = graph.getVertices();
 
         if (vertices == 0) {
@@ -22,17 +30,30 @@ public class Prim {
         boolean[] visited = new boolean[vertices];
 
         PriorityQueue<Edge> priorityQueue = new PriorityQueue<>(
-                (a, b) -> Double.compare(
-                        a.getWeight(),
-                        b.getWeight()
-                )
+                (a, b) -> {
+                    if (metrics != null) {
+                        metrics.recordComparison();
+                    }
+
+                    return Double.compare(
+                            a.getWeight(),
+                            b.getWeight()
+                    );
+                }
         );
 
         List<Edge> mstEdges = new ArrayList<>();
         double totalWeight = 0.0;
 
         visited[0] = true;
-        priorityQueue.addAll(graph.getNeighbors(0));
+
+        for (Edge edge : graph.getNeighbors(0)) {
+            if (metrics != null) {
+                metrics.recordEdgeExamination();
+            }
+
+            priorityQueue.add(edge);
+        }
 
         while (!priorityQueue.isEmpty()
                 && mstEdges.size() < vertices - 1) {
@@ -49,6 +70,10 @@ public class Prim {
             totalWeight += edge.getWeight();
 
             for (Edge neighbor : graph.getNeighbors(destination)) {
+                if (metrics != null) {
+                    metrics.recordEdgeExamination();
+                }
+
                 if (!visited[neighbor.getDestination()]) {
                     priorityQueue.add(neighbor);
                 }

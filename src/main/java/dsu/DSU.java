@@ -1,17 +1,23 @@
 package dsu;
-
+import metrics.AlgorithmMetrics;
 public class DSU {
 
     private final int[] parent;
     private final int[] rank;
+    private final AlgorithmMetrics metrics;
 
     public DSU(int size) {
+        this(size, null);
+    }
+
+    public DSU(int size, AlgorithmMetrics metrics) {
         if (size < 0) {
             throw new IllegalArgumentException(
                     "Size cannot be negative"
             );
         }
 
+        this.metrics = metrics;
         parent = new int[size];
         rank = new int[size];
 
@@ -21,8 +27,14 @@ public class DSU {
         }
     }
 
+
+
     public int find(int x) {
         validateElement(x);
+
+        if (metrics != null) {
+            metrics.recordDsuFind();
+        }
 
         if (parent[x] != x) {
             parent[x] = find(parent[x]);
@@ -31,9 +43,15 @@ public class DSU {
         return parent[x];
     }
 
+
+
     public boolean union(int x, int y) {
         validateElement(x);
         validateElement(y);
+
+        if (metrics != null) {
+            metrics.recordDsuUnion();
+        }
 
         int rootX = find(x);
         int rootY = find(y);
@@ -53,6 +71,7 @@ public class DSU {
 
         return true;
     }
+
 
     public boolean connected(int x, int y) {
         return find(x) == find(y);
