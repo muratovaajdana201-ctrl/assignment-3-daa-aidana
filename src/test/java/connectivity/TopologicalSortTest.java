@@ -11,50 +11,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class TopologicalSortTest {
 
     @Test
-    void producesValidTopologicalOrder() {
-        Graph graph = new Graph(6);
-
-        graph.addDirectedEdge(5, 2, 1);
-        graph.addDirectedEdge(5, 0, 1);
-        graph.addDirectedEdge(4, 0, 1);
-        graph.addDirectedEdge(4, 1, 1);
-        graph.addDirectedEdge(2, 3, 1);
-        graph.addDirectedEdge(3, 1, 1);
-
-        List<Integer> order = TopologicalSort.sort(graph);
-
-        assertEquals(6, order.size());
-        assertEquals(6, order.stream().distinct().count());
-
-        // Every directed edge must go from an earlier to a later vertex.
-        int[] position = new int[6];
-
-        for (int i = 0; i < order.size(); i++) {
-            position[order.get(i)] = i;
-        }
-
-        for (int u = 0; u < graph.getVertices(); u++) {
-            for (var edge : graph.getNeighbors(u)) {
-                assertTrue(
-                        position[u] < position[edge.getDestination()],
-                        "Edge violates topological order: " + edge
-                );
-            }
-        }
-    }
-
-    @Test
-    void handlesGraphWithNoEdges() {
+    void returnsValidOrderForDag() {
         Graph graph = new Graph(4);
+
+        graph.addDirectedEdge(0, 1, 1);
+        graph.addDirectedEdge(0, 2, 1);
+        graph.addDirectedEdge(1, 3, 1);
+        graph.addDirectedEdge(2, 3, 1);
 
         List<Integer> order = TopologicalSort.sort(graph);
 
         assertEquals(4, order.size());
         assertEquals(4, order.stream().distinct().count());
+
+        assertTrue(order.indexOf(0) < order.indexOf(1));
+        assertTrue(order.indexOf(0) < order.indexOf(2));
+        assertTrue(order.indexOf(1) < order.indexOf(3));
+        assertTrue(order.indexOf(2) < order.indexOf(3));
     }
 
     @Test
-    void rejectsDirectedCycle() {
+    void detectsCycle() {
         Graph graph = new Graph(3);
 
         graph.addDirectedEdge(0, 1, 1);
@@ -65,5 +42,12 @@ class TopologicalSortTest {
                 IllegalArgumentException.class,
                 () -> TopologicalSort.sort(graph)
         );
+    }
+
+    @Test
+    void handlesSingleVertex() {
+        Graph graph = new Graph(1);
+
+        assertEquals(List.of(0), TopologicalSort.sort(graph));
     }
 }

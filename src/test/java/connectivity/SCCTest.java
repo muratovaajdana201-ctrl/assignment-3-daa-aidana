@@ -13,17 +13,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class SCCTest {
 
     @Test
-    void findsExpectedStronglyConnectedComponents() {
+    void findsAllStronglyConnectedComponents() {
         Graph graph = new Graph(5);
 
         graph.addDirectedEdge(0, 1, 1);
+        graph.addDirectedEdge(1, 0, 1);
+
         graph.addDirectedEdge(1, 2, 1);
-        graph.addDirectedEdge(2, 0, 1);
-        graph.addDirectedEdge(1, 3, 1);
+
+        graph.addDirectedEdge(2, 3, 1);
+        graph.addDirectedEdge(3, 2, 1);
+
         graph.addDirectedEdge(3, 4, 1);
-        graph.addDirectedEdge(4, 3, 1);
 
         List<List<Integer>> components = SCC.findSCCs(graph);
+
+        assertEquals(3, components.size());
 
         Set<Set<Integer>> actual = new HashSet<>();
 
@@ -31,40 +36,35 @@ class SCCTest {
             actual.add(new HashSet<>(component));
         }
 
-        Set<Set<Integer>> expected = Set.of(
-                Set.of(0, 1, 2),
-                Set.of(3, 4)
-        );
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void everyVertexBelongsToExactlyOneComponent() {
-        Graph graph = new Graph(4);
-
-        graph.addDirectedEdge(0, 1, 1);
-        graph.addDirectedEdge(2, 3, 1);
-
-        List<List<Integer>> components = SCC.findSCCs(graph);
+        assertTrue(actual.contains(Set.of(0, 1)));
+        assertTrue(actual.contains(Set.of(2, 3)));
+        assertTrue(actual.contains(Set.of(4)));
 
         Set<Integer> allVertices = new HashSet<>();
 
         for (List<Integer> component : components) {
             for (int vertex : component) {
-                assertTrue(allVertices.add(vertex));
+                assertTrue(allVertices.add(vertex),
+                        "Vertex appears in multiple components");
             }
         }
 
-        assertEquals(Set.of(0, 1, 2, 3), allVertices);
+        assertEquals(Set.of(0, 1, 2, 3, 4), allVertices);
     }
 
     @Test
-    void isolatedVerticesAreSeparateComponents() {
+    void everyVertexIsItsOwnComponentWithoutEdges() {
         Graph graph = new Graph(3);
 
         List<List<Integer>> components = SCC.findSCCs(graph);
 
         assertEquals(3, components.size());
+    }
+
+    @Test
+    void handlesEmptyGraph() {
+        Graph graph = new Graph(0);
+
+        assertTrue(SCC.findSCCs(graph).isEmpty());
     }
 }

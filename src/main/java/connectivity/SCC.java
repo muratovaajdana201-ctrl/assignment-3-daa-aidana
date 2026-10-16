@@ -1,7 +1,15 @@
+
 package connectivity;
-import graph.Edge; import graph.Graph;
-import java.util.ArrayList; import java.util.Collections; import java.util.List;
+
+import graph.Edge;
+import graph.Graph;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class SCC {
+
     private SCC() {
     }
 
@@ -11,14 +19,14 @@ public class SCC {
         boolean[] visited = new boolean[vertices];
         List<Integer> finishOrder = new ArrayList<>();
 
-
+        // First DFS pass: calculate finishing order.
         for (int v = 0; v < vertices; v++) {
             if (!visited[v]) {
                 fillOrder(graph, v, visited, finishOrder);
             }
         }
 
-
+        // Build the transposed graph.
         Graph transpose = new Graph(vertices);
 
         for (int u = 0; u < vertices; u++) {
@@ -31,7 +39,7 @@ public class SCC {
             }
         }
 
-
+        // Second DFS pass: collect strongly connected components.
         List<List<Integer>> components = new ArrayList<>();
         java.util.Arrays.fill(visited, false);
 
