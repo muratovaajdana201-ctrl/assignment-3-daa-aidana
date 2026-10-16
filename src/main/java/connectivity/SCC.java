@@ -1,14 +1,9 @@
-
 package connectivity;
-
-import graph.Edge;
-import graph.Graph;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import graph.Edge; import graph.Graph;
+import java.util.ArrayList; import java.util.Collections; import java.util.List;
 public class SCC {
+    private SCC() {
+    }
 
     public static List<List<Integer>> findSCCs(Graph graph) {
         int vertices = graph.getVertices();
@@ -16,19 +11,19 @@ public class SCC {
         boolean[] visited = new boolean[vertices];
         List<Integer> finishOrder = new ArrayList<>();
 
-        // First DFS: record vertices in finishing order.
+
         for (int v = 0; v < vertices; v++) {
             if (!visited[v]) {
-                dfsOriginal(graph, v, visited, finishOrder);
+                fillOrder(graph, v, visited, finishOrder);
             }
         }
 
-        // Reverse all directed edges.
-        Graph reversed = new Graph(vertices);
+
+        Graph transpose = new Graph(vertices);
 
         for (int u = 0; u < vertices; u++) {
             for (Edge edge : graph.getNeighbors(u)) {
-                reversed.addDirectedEdge(
+                transpose.addDirectedEdge(
                         edge.getDestination(),
                         u,
                         edge.getWeight()
@@ -36,16 +31,18 @@ public class SCC {
             }
         }
 
-        // Second DFS: explore the reversed graph in reverse finish order.
-        java.util.Arrays.fill(visited, false);
+
         List<List<Integer>> components = new ArrayList<>();
+        java.util.Arrays.fill(visited, false);
 
         Collections.reverse(finishOrder);
 
         for (int v : finishOrder) {
             if (!visited[v]) {
                 List<Integer> component = new ArrayList<>();
-                dfsReversed(reversed, v, visited, component);
+                collectComponent(
+                        transpose, v, visited, component
+                );
                 components.add(component);
             }
         }
@@ -53,7 +50,7 @@ public class SCC {
         return components;
     }
 
-    private static void dfsOriginal(
+    private static void fillOrder(
             Graph graph,
             int vertex,
             boolean[] visited,
@@ -65,14 +62,14 @@ public class SCC {
             int next = edge.getDestination();
 
             if (!visited[next]) {
-                dfsOriginal(graph, next, visited, finishOrder);
+                fillOrder(graph, next, visited, finishOrder);
             }
         }
 
         finishOrder.add(vertex);
     }
 
-    private static void dfsReversed(
+    private static void collectComponent(
             Graph graph,
             int vertex,
             boolean[] visited,
@@ -85,7 +82,9 @@ public class SCC {
             int next = edge.getDestination();
 
             if (!visited[next]) {
-                dfsReversed(graph, next, visited, component);
+                collectComponent(
+                        graph, next, visited, component
+                );
             }
         }
     }
