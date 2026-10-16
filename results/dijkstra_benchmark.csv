@@ -1,0 +1,4 @@
+vertices,edges,avg_time_ms,edge_examinations,comparisons
+10,30,0.077600,30,12
+100,500,0.809320,500,141
+1000,5000,1.660020,5000,1391
