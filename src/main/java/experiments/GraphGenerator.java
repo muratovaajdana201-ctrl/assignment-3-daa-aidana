@@ -1,6 +1,7 @@
 
 package experiments;
 
+import graph.Edge;
 import graph.Graph;
 
 import java.util.Random;
@@ -8,7 +9,7 @@ import java.util.Random;
 public class GraphGenerator {
 
     private GraphGenerator() {
-        // Utility class.
+        // Utility class
     }
 
     public static Graph generateConnectedUndirectedGraph(
@@ -18,7 +19,7 @@ public class GraphGenerator {
     ) {
         if (vertices < 1) {
             throw new IllegalArgumentException(
-                    "The graph must have at least one vertex"
+                    "The graph must contain at least one vertex"
             );
         }
 
@@ -26,39 +27,46 @@ public class GraphGenerator {
 
         if (edges < vertices - 1 || edges > maxEdges) {
             throw new IllegalArgumentException(
-                    "A connected simple undirected graph requires "
-                            + "V - 1 <= E <= V * (V - 1) / 2"
+                    "Invalid edge count for a connected simple graph"
             );
         }
 
         Graph graph = new Graph(vertices);
         Random random = new Random(seed);
 
-        // Step 1: create a spanning chain so the graph is connected.
-        for (int v = 1; v < vertices; v++) {
+        // First, connect all vertices in a chain.
+        for (int vertex = 1; vertex < vertices; vertex++) {
             double weight = 1 + random.nextInt(100);
-            graph.addUndirectedEdge(v - 1, v, weight);
+            graph.addUndirectedEdge(vertex - 1, vertex, weight);
         }
 
-        // Step 2: add random edges without duplicates.
-        while (graph.getAllEdges().size() / 2 < edges) {
-            int u = random.nextInt(vertices);
-            int v = random.nextInt(vertices);
+        // Then add random edges without duplicates.
+        int addedEdges = vertices - 1;
 
-            if (u == v || hasEdge(graph, u, v)) {
+        while (addedEdges < edges) {
+            int source = random.nextInt(vertices);
+            int destination = random.nextInt(vertices);
+
+            if (source == destination
+                    || hasEdge(graph, source, destination)) {
                 continue;
             }
 
             double weight = 1 + random.nextInt(100);
-            graph.addUndirectedEdge(u, v, weight);
+            graph.addUndirectedEdge(source, destination, weight);
+            addedEdges++;
         }
 
         return graph;
     }
 
-    private static boolean hasEdge(Graph graph, int u, int v) {
-        for (var edge : graph.getNeighbors(u)) {
-            if (edge.getDestination() == v) {
+    private static boolean hasEdge(
+            Graph graph,
+            int source,
+            int destination
+    ) {
+        for (Edge edge : graph.getNeighbors(source)) {
+            if (edge.getDestination() == destination) {
                 return true;
             }
         }

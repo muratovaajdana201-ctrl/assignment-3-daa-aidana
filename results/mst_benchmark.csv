@@ -1,0 +1,4 @@
+vertices,edges,kruskal_avg_ms,prim_avg_ms,kruskal_edge_examinations,kruskal_comparisons,dsu_find_calls,dsu_union_calls,prim_edge_examinations,prim_comparisons
+10,30,1.459500,0.682720,29,270,102,29,60,153
+100,500,1.479460,0.802080,636,8685,2444,636,1000,5943
+1000,5000,6.107500,4.050080,6280,103100,24283,6280,10000,80577
